@@ -68,6 +68,12 @@ interface vlan{{ vlan_id[1] }}
      {% endif %}
    {% endif %}
 
+   {% if vlan_vars.raw_cli is defined %}
+     {% for raw in vlan_vars.raw_cli %}
+ {{ raw }}
+     {% endfor %}
+   {% endif %}
+
    {% if vlan_vars.virtual_gateway_ip is defined %}
      {% if vlan_vars.virtual_gateway_ip %}
  ip virtual-router address {{ vlan_vars.virtual_gateway_ip }}
