@@ -11,13 +11,25 @@ os10_users:
 ###############################################}
 {% if os10_users is defined and os10_users %}
   {% for item in os10_users %}
-    {% if item.username is defined and item.username %}
+    {% if item.type is defined and item.type == "system" %}
+      {% if item.state is defined and item.state == "absent" %}
+system-user linuxadmin disable
+      {% else %}
+        {% if item.password is defined and item.password %}
+system-user linuxadmin password {{ item.password }}
+        {% endif %}
+      {% endif %}
+    {% elif item.username is defined and item.username %}
       {% if item.state is defined and item.state == "absent" %}
 no username {{ item.username }}
       {% else %}
         {% if item.password is defined and item.password %}
           {% if item.role is defined and item.role %}
+            {% if item.password_expiry is defined %}
+username {{ item.username }} password {{ item.password }} role {{ item.role }} password-expiry {{ item.password_expiry }}
+            {% else %}
 username {{ item.username }} password {{ item.password }} role {{ item.role }}
+            {% endif %}
           {% else %}
 username {{ item.username }} password {{ item.password }}
           {% endif %}
@@ -27,6 +39,13 @@ username {{ item.username }} password {{ item.password }}
 no username {{ item.username }} sshkey
           {% else %}
 username {{ item.username }} sshkey "{{ item.sshkey }}" 
+          {% endif %}
+        {% endif %}
+        {% if item.sshkey_file is defined and item.sshkey_file %}
+          {% if item.sshkey_file is none %}
+no username {{ item.username }} sshkey
+          {% else %}
+username {{ item.username }} sshkey filename "{{ item.sshkey_file }}" 
           {% endif %}
         {% endif %}
       {% endif %}
