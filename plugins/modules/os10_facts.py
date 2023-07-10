@@ -212,7 +212,8 @@ class Hardware(FactsBase):
 
     COMMANDS = [
         'show version | display-xml',
-        'show processes node-id 1 | grep "Mem :"'
+        'show processes node-id 1 | grep "Mem :"',
+        'show system | grep "BIOS|ONIE"'
     ]
 
     def populate(self):
@@ -230,6 +231,12 @@ class Hardware(FactsBase):
             self.facts['memtotal_mb'] = int(match[0]) // 1024
             self.facts['memfree_mb'] = int(match[1]) // 1024
 
+        data = self.responses[2]
+        match = self.parse_bios(data)
+        if match:
+            self.facts['bios_version'] = match[1]
+            self.facts['onie_version'] = match[2]
+
     def parse_cpu_arch(self, data):
         cpu_arch = data.find('./data/system-sw-state/sw-version/cpu-arch')
         if cpu_arch is not None:
@@ -239,6 +246,9 @@ class Hardware(FactsBase):
 
     def parse_memory(self, data):
         return re.findall(r'(\d+)', data, re.M)
+
+    def parse_bios(self, data):
+        return re.findall(r'([0-9\.-]+)', data, re.M)
 
 
 class Config(FactsBase):
