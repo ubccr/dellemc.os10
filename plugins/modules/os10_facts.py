@@ -155,6 +155,7 @@ class Default(FactsBase):
     COMMANDS = [
         'show version | display-xml',
         'show system | display-xml',
+        'show license status | display-xml',
     ]
 
     def populate(self):
@@ -164,6 +165,7 @@ class Default(FactsBase):
 
         self.facts['name'] = self.parse_name(xml_data)
         self.facts['version'] = self.parse_version(xml_data)
+        self.facts['sw_build'] = self.parse_build(xml_data)
         self.facts['model'] = self.parse_model(xml_data)
         self.facts['hostname'] = self.parse_hostname(xml_data)
 
@@ -171,6 +173,14 @@ class Default(FactsBase):
         xml_data = ET.fromstring(data.encode('utf8'))
 
         self.facts['servicetag'] = self.parse_servicetag(xml_data)
+        self.facts['platform'] = self.parse_platform(xml_data)
+        self.facts['diagos'] = self.parse_diagos(xml_data)
+        self.facts['hwver'] = self.parse_hwver(xml_data)
+        self.facts['port_info'] = self.parse_ports(xml_data)
+
+        data = self.responses[2]
+        xml_data = ET.fromstring(data.encode('utf8'))
+        self.facts['license'] = self.parse_license(xml_data)
 
     def parse_name(self, data):
         sw_name = data.find('./data/system-sw-state/sw-version/sw-name')
@@ -183,6 +193,13 @@ class Default(FactsBase):
         sw_ver = data.find('./data/system-sw-state/sw-version/sw-version')
         if sw_ver is not None:
             return sw_ver.text
+        else:
+            return ""
+
+    def parse_build(self, data):
+        build_ver = data.find('./data/system-sw-state/sw-version/sw-build-version')
+        if build_ver is not None:
+            return build_ver.text
         else:
             return ""
 
@@ -204,6 +221,41 @@ class Default(FactsBase):
         svc_tag = data.find('./data/system/node/unit/mfg-info/service-tag')
         if svc_tag is not None:
             return svc_tag.text
+        else:
+            return ""
+
+    def parse_platform(self, data):
+        platform_name = data.find('./data/system/node/unit/mfg-info/platform-name')
+        if platform_name is not None:
+            return platform_name.text
+        else:
+            return ""
+
+    def parse_diagos(self, data):
+        diag_ver = data.find('./data/system/node/mfg-info/diagos-revision')
+        if diag_ver is not None:
+            return diag_ver.text
+        else:
+            return ""
+
+    def parse_hwver(self, data):
+        hwver = data.find('./data/system/node/mfg-info/hw-version')
+        if hwver is not None:
+            return hwver.text
+        else:
+            return ""
+
+    def parse_ports(self, data):
+        port_info = data.find('./data/system/node/unit/port-info')
+        if port_info is not None:
+            return port_info.text
+        else:
+            return ""
+
+    def parse_license(self, data):
+        lic_type = data.find('./data/license-state/license-type')
+        if lic_type is not None:
+            return lic_type.text
         else:
             return ""
 
